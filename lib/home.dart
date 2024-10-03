@@ -1,8 +1,6 @@
-import 'package:flutter_ingles/animal.dart';
-import 'package:flutter_ingles/vowels.dart';
-import 'package:flutter_ingles/numbers.dart';
-import 'package:flutter_ingles/videos.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ingles/animal.dart';
+import 'package:flutter_ingles/numbers.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -11,14 +9,22 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   TabController? _tabController;
+  int _selectedIndex = 0; 
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
       vsync: this,
-      length: 4,
+      length: 2,  
     );
+    
+    
+    _tabController!.addListener(() {
+      setState(() {
+        _selectedIndex = _tabController!.index; 
+      });
+    });
   }
 
   @override
@@ -41,10 +47,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
           controller: _tabController,
           tabs: <Widget>[
-            Tab(text: "Animal"),
-            Tab(text: "Vowels"),
-            Tab(text: "Numbers"),
-            Tab(text: "Videos"),
+            _buildFadeTransitionTab("Animal", 0),
+            _buildFadeTransitionTab("Numbers", 1),
           ],
         ),
       ),
@@ -52,10 +56,42 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         controller: _tabController,
         children: <Widget>[
           Animal(),
-         // Vowels(),
-          //Videos(),
           Numbers(),
-        ]
+        ],
+      ),
+    );
+  }
+
+  
+  Widget _buildFadeTransitionTab(String label, int index) {
+    bool isSelected = _selectedIndex == index;  
+    double opacity = isSelected ? 0.5 : 1.0; 
+    Color tabColor = Colors.red;
+    return FadeTransition(
+      opacity: Tween(begin: 1.0, end: opacity).animate(
+        CurvedAnimation(
+          parent: _tabController!.animation!,
+          curve: Interval(0.0, 1.0, curve: Curves.easeInOut),
+        ),
+      ),
+      child: Tab(
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              _selectedIndex = index; 
+            });
+            _tabController!.animateTo(index);
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: tabColor.withOpacity(isSelected ? 0.5 : 1.0),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

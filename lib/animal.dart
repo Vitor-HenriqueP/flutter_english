@@ -1,71 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'dart:math';  
 
-class   Animal extends StatefulWidget {
+class Animal extends StatefulWidget {
   @override
   _AnimalState createState() => _AnimalState();
 }
-class _AnimalState extends State<Animal>{
-  final player = AudioPlayer();
 
-  void _executar(String nameAudio){
+class _AnimalState extends State<Animal> with TickerProviderStateMixin {
+  final player = AudioPlayer();
+  Color _containerColor = Colors.transparent;
+
+  void _executar(String nameAudio) {
     player.play(AssetSource("audios/${nameAudio}.mp3"));
+    setState(() {
+      _containerColor = _generateRandomColor();  
+    });
+  }
+
+  Color _generateRandomColor() {
+    final random = Random();
+    return Color.fromRGBO(
+      random.nextInt(256), 
+      random.nextInt(256), 
+      random.nextInt(256), 
+      1,                   
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
-
     return GridView.count(
       crossAxisCount: 2,
-      childAspectRatio: MediaQuery.of(context).size.aspectRatio*2,
+      childAspectRatio: MediaQuery.of(context).size.aspectRatio * 2,
       children: <Widget>[
-        GestureDetector(
-          onTap: (){
-            _executar("cao");
-          },
-          child: Image.asset("assets/imagens/cao.png"),
-
-        ),
-        GestureDetector(
-          onTap: (){
-            _executar("gato");
-          },
-          child: Image.asset("assets/imagens/gato.png"),
-
-        ),
-        GestureDetector(
-          onTap: (){
-            _executar("leao");
-          },
-          child: Image.asset("assets/imagens/leao.png"),
-
-        ),
-        GestureDetector(
-          onTap: (){
-            _executar("macaco");
-          },
-          child: Image.asset("assets/imagens/macaco.png"),
-
-        ),
-        GestureDetector(
-          onTap: (){
-            _executar("ovelha");
-          },
-          child: Image.asset("assets/imagens/ovelha.png"),
-
-        ),
-        GestureDetector(
-          onTap: (){
-            _executar("vaca");
-          },
-          child: Image.asset("assets/imagens/vaca.png"),
-
-        ),
-
+        _buildAnimalTile("cao", "assets/imagens/cao.png"),
+        _buildAnimalTile("gato", "assets/imagens/gato.png"),
+        _buildAnimalTile("leao", "assets/imagens/leao.png"),
+        _buildAnimalTile("macaco", "assets/imagens/macaco.png"),
+        _buildAnimalTile("ovelha", "assets/imagens/ovelha.png"),
+        _buildAnimalTile("vaca", "assets/imagens/vaca.png"),
       ],
+    );
+  }
+
+  Widget _buildAnimalTile(String audio, String image) {
+    return GestureDetector(
+      onTap: () => _executar(audio),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        color: _containerColor,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.5, end: 1.0).animate(
+            CurvedAnimation(
+              parent: AnimationController(
+                vsync: this,
+                duration: Duration(milliseconds: 300),
+              )..forward(),
+              curve: Curves.easeInOut,
+            ),
+          ),
+          child: Image.asset(image),
+        ),
+      ),
     );
   }
 }
